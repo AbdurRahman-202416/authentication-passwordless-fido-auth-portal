@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": "86e2cad8-58ae-4aac-ae9a-980f15078ef7",
+      "username": "Hi",
+      "credentials": [
+        {
+          "id": "VE9VRHJ3NzNsLTZ3aUpYemhBa0Zsdw",
+          "publicKey": "pQECAyYgASFYIJf0aqC8VH7F4GCnDLCy5bXQmMHTnnf_bdw9ifSvkXV0Ilggn09kX7OQUjjwOypRYuJpILn6DAqucGdp6-X7OdYSYG4",
+          "counter": 0
+        }
+      ],
+      "currentChallenge": "vD_MEBThhoTIEkY0_9p6CuM1R4-Z5CHFKgL2bFyLGaM"
+    }
+  ]
+}
