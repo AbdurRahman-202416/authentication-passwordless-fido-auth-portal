@@ -1,21 +1,12 @@
-"use client";
+// app/login/page.tsx
+'use client';
 
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Fingerprint icon for passkey
 const FingerprintIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-16 h-16"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-16 h-16">
     <path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4" />
     <path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2" />
     <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
@@ -28,32 +19,33 @@ const FingerprintIcon = () => (
   </svg>
 );
 
-// User icon
 const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5 text-gray-400"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gray-400">
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
+const LockIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gray-400">
+    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
+
 export default function LoginPage() {
+  const [step, setStep] = useState(1); // 1: credentials, 2: passkey
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [userId, setUserId] = useState(""); // ✅ Added userId state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  async function handleLogin() {
-    if (!username.trim()) {
-      setError("Please enter your username");
+  // Step 1: Verify username and password against Express server
+  const handlePasswordLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password");
       return;
     }
 
@@ -61,184 +53,202 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Get authentication options from server
-      const res = await fetch("/api/login/options", {
-        method: "POST",
-        body: JSON.stringify({ username }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const options = await res.json();
-
-      if (options.error) {
-        setError("Login failed: " + options.error);
-        setLoading(false);
-        return;
-      }
-
-      console.log("🔑 Authentication options received:", options);
-      
-      // Check if user has any credentials
-      if (!options.allowCredentials || options.allowCredentials.length === 0) {
-        setError("No passkeys found for this account. Please register first.");
-        setLoading(false);
-        return;
-      }
-
-      console.log("🔐 Starting authentication with browser...");
-
-      // Start the authentication ceremony
-      let credential;
-      try {
-        credential = await startAuthentication(options);
-        console.log("✅ Browser authentication successful:", credential);
-      } catch (authError) {
-        console.error("❌ Browser authentication failed:", authError);
-        
-        // Handle specific errors
-        if (authError.name === "NotAllowedError") {
-          setError("Authentication cancelled or no matching passkey found. Make sure you're using the same device/browser where you registered.");
-        } else if (authError.name === "InvalidStateError") {
-          setError("Invalid authentication state. Please try again.");
-        } else {
-          setError("Authentication failed: " + authError.message);
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Verify with server
-      console.log("📡 Verifying with server...");
-      const verifyRes = await fetch("/api/login/verify", {
+      // ✅ Call Express server directly (NOT /api/)
+      const res = await fetch("http://localhost:4000/login/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, credential }),
+        body: JSON.stringify({ username, password }),
       });
 
-      const verifyData = await verifyRes.json();
-      
-      if (verifyData.verified) {
-        console.log("✅ Login successful!");
-        alert("✅ Login Successful!");
-        router.push("/dashboard");
-      } else {
-        console.error("❌ Server verification failed:", verifyData);
-        setError("Login verification failed. Please try again.");
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setError(data.error || "Invalid credentials");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error("❌ Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+
+      // ✅ Save userId for passkey step
+      setUserId(data.userId);
+      setStep(2);
+    } catch (err: any) {
+      console.error(err);
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  // Step 2: Verify passkey
+  const handlePasskeyLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      // ✅ Use userId from state
+      const optionsRes = await fetch("http://localhost:4000/login-challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!optionsRes.ok) {
+        const err = await optionsRes.json();
+        throw new Error(err.error || "Failed to get login challenge");
+      }
+
+      const { options } = await optionsRes.json();
+
+      const credential = await startAuthentication(options);
+
+      const verifyRes = await fetch("http://localhost:4000/login-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, cred: credential }),
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.success) {
+        alert("✅ Login Successful!");
+        router.push("/dashboard");
+      } else {
+        setError(verifyData.error || "Passkey verification failed");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Login error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      {/* Background decoration */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative w-full max-w-md">
-        {/* Main Card */}
-        <div className="bg-gray-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 p-6 sm:p-8 md:p-10">
-          {/* Icon Section */}
+        <div className="bg-gray-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 p-8">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              {/* Glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
-              
-              {/* Icon container */}
               <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-full shadow-lg shadow-indigo-500/50">
                 <FingerprintIcon />
               </div>
             </div>
           </div>
 
-          {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2 text-white">
-            Welcome Back
+          {/* Progress Indicator */}
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${step >= 1 ? 'bg-indigo-500' : 'bg-gray-600'}`}></div>
+              <div className={`w-8 h-1 ${step >= 2 ? 'bg-indigo-500' : 'bg-gray-600'}`}></div>
+              <div className={`w-3 h-3 rounded-full ${step >= 2 ? 'bg-indigo-500' : 'bg-gray-600'}`}></div>
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-bold text-center mb-2 text-white">
+            {step === 1 ? "Welcome Back" : "Verify Passkey"}
           </h1>
-          <p className="text-center text-gray-400 mb-8 text-sm sm:text-base">
-            Sign in with your{" "}
-            <span className="text-indigo-400 font-semibold">passkey</span>
+          <p className="text-center text-gray-400 mb-8 text-sm">
+            {step === 1
+              ? "Enter your credentials to continue"
+              : "Authenticate with your biometric passkey"}
           </p>
 
-          {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
               <p className="text-red-400 text-sm text-center">{error}</p>
             </div>
           )}
 
-          {/* Form */}
-          <div className="space-y-4 sm:space-y-5">
-            {/* Username Input */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon />
+          {step === 1 ? (
+            /* Step 1: Username and Password */
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <UserIcon />
+                  </div>
+                  <input
+                    type="text"
+                    className="w-full bg-gray-900/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={loading}
+                  />
                 </div>
-                <input
-                  type="text"
-                  className="w-full bg-gray-900/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-                  disabled={loading}
-                />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <LockIcon />
+                  </div>
+                  <input
+                    type="password"
+                    className="w-full bg-gray-900/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handlePasswordLogin()}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <button
+                className={`w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
+                disabled={loading}
+                onClick={handlePasswordLogin}
+              >
+                {loading ? "Verifying..." : "Continue →"}
+              </button>
             </div>
+          ) : (
+            /* Step 2: Passkey Verification */
+            <div className="space-y-4">
+              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4 mb-6">
+                <p className="text-sm text-gray-300 mb-2">
+                  ✅ Password verified for: <span className="text-indigo-400 font-semibold">{username}</span>
+                </p>
+                <p className="text-xs text-gray-400">
+                  Now verify your identity with your registered passkey.
+                </p>
+              </div>
 
-            {/* Login Button */}
-            <button
-              className={`w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
-                loading ? "animate-pulse" : ""
-              }`}
-              disabled={loading}
-              onClick={handleLogin}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Authenticating...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center">
-                  <span className="mr-2">🔐</span>
-                  Sign in with Passkey
-                </span>
-              )}
-            </button>
-          </div>
+              <button
+                className={`w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
+                disabled={loading}
+                onClick={handlePasskeyLogin}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Authenticating...
+                  </span>
+                ) : "Verify with Passkey 🔐"}
+              </button>
 
-          {/* Feature Tags */}
-          <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 justify-center">
+              <button
+                className="w-full text-gray-400 hover:text-white text-sm py-2 transition-colors"
+                onClick={() => setStep(1)}
+                disabled={loading}
+              >
+                ← Back to password
+              </button>
+            </div>
+          )}
+
+          <div className="mt-8 flex flex-wrap gap-2 justify-center">
             <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500/20">
               🛡️ Secure
             </span>
@@ -246,29 +256,23 @@ export default function LoginPage() {
               ⚡ Fast
             </span>
             <span className="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-xs font-medium border border-purple-500/20">
-              🔒 Passwordless
+              🔒 2-Factor
             </span>
           </div>
 
-          {/* Footer */}
-          <div className="mt-6 sm:mt-8 text-center">
-            <p className="text-gray-400 text-xs sm:text-sm">
+          <div className="mt-8 text-center">
+            <p className="text-gray-400 text-sm">
               Don't have an account?{" "}
-              <a
-                href="/register"
-                className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
-              >
+              <a href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
                 Register here
               </a>
             </p>
           </div>
         </div>
 
-        {/* Bottom Info */}
         <div className="mt-6 text-center">
-          <p className="text-gray-500 text-xs sm:text-sm">
-            Protected by{" "}
-            <span className="text-indigo-400 font-semibold">FIDO WebAuthn</span>
+          <p className="text-gray-500 text-sm">
+            Protected by <span className="text-indigo-400 font-semibold">FIDO WebAuthn</span>
           </p>
         </div>
       </div>
