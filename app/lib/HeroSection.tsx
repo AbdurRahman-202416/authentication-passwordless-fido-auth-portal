@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 // Inline SVG for a security/lock icon
@@ -58,20 +59,20 @@ export default function HeroSection() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
-              <a
+              <Link
                 href="/register"
                 className="inline-flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 transform hover:scale-105 hover:shadow-indigo-500/50"
               >
                 <span className="mr-2"></span>
                 Register Passkey
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/login"
                 className="inline-flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border border-gray-600 hover:border-gray-500"
               >
                 <span className="mr-2"></span>
                 Sign In (Passwordless)
-              </a>
+              </Link>
             </div>
           </div>
 
