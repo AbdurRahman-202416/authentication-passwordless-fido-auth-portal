@@ -1,0 +1,90 @@
+import { getUserById, getCredentialsForUser, saveChallenge } from '../../../lib/storage';
+import { generateChallenge } from '../../../lib/webauthn-helpers';
+import { base64UrlEncode } from '../../../lib/base64url';
+
+// POST /api/login-challenge
+// expects { userId }
+export async function POST(req) {
+  try {
+    const { userId } = await req.json();
+    if (!userId) return new Response(JSON.stringify({ error: 'userId required' }), { status: 400 });
+
+  const user = getUserById(userId);
+  console.debug(`/api/login-challenge request userId=${userId} -> user=`, user);
+  if (!user) return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+
+    const challenge = generateChallenge();
+    saveChallenge(userId, challenge);
+
+    // Extract RP ID in a robust way so the tunnel hostname (or host header) is used
+    // Priority: host header (strip port) -> x-forwarded-host -> origin -> referer
+    let rpId = undefined;
+    try {
+      const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || '';
+      const origin = req.headers.get('origin') || '';
+      const referer = req.headers.get('referer') || req.headers.get('referrer') || '';
+      console.debug(`/api/login-challenge headers host: "${host}", origin: "${origin}", referer: "${referer}"`);
+
+      if (host) {
+        rpId = host.split(',')[0].trim().split(':')[0];
+        console.debug(`/api/login-challenge using host header (RP ID): "${rpId}"`);
+      } else if (origin) {
+        const url = new URL(origin);
+        rpId = url.hostname;
+        console.debug(`/api/login-challenge using origin hostname (RP ID): "${rpId}"`);
+      } else if (referer) {
+        const url = new URL(referer);
+        rpId = url.hostname;
+        console.debug(`/api/login-challenge using referer hostname (RP ID): "${rpId}"`);
+      }
+    } catch (e) {
+      console.debug(`/api/login-challenge header parsing failed:`, e);
+      // fallback to undefined
+    }
+    console.debug(`/api/login-challenge final RP ID: "${rpId}"`);
+
+    const credentials = getCredentialsForUser(userId) || [];
+    // ensure credential ids are base64url strings (handle several stored shapes)
+    const allowCredentials = credentials.map((c) => {
+      let id = c.id;
+
+      // Helper to normalize many possible shapes into a base64url string
+      const normalize = (val) => {
+        try {
+          if (typeof val === 'string') return val;
+          if (Array.isArray(val)) return base64UrlEncode(Buffer.from(val));
+          // Buffer or Uint8Array
+          if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) return base64UrlEncode(Buffer.from(val));
+          if (val instanceof Uint8Array) return base64UrlEncode(Buffer.from(val));
+          if (val && typeof val === 'object') {
+            const nums = Object.values(val).filter((v) => typeof v === 'number');
+            if (nums.length) return base64UrlEncode(Buffer.from(nums));
+          }
+        } catch {
+          // fallthrough to string conversion
+        }
+        return String(val ?? '');
+      };
+
+      id = normalize(id);
+
+      return { id, type: 'public-key' };
+    });
+
+    const options = {
+      publicKey: {
+        challenge,
+        timeout: 60000,
+        allowCredentials,
+        userVerification: 'preferred',
+      },
+    };
+    if (rpId) {
+      options.publicKey.rpId = rpId;
+    }
+
+    return new Response(JSON.stringify({ options }), { status: 200 });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
+  }
+}

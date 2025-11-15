@@ -66,7 +66,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/register", {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -87,19 +87,44 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      const optionsRes = await fetch(
-        "http://localhost:4000/register-challenge",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
-        }
-      );
-      const { options } = await optionsRes.json();
+      if (!userId) {
+        setError('Missing userId. Please complete step 1 first.');
+        setLoading(false);
+        return;
+      }
+      const optionsRes = await fetch("/api/register-challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const json = await optionsRes.json();
+      console.debug('/api/register-challenge response:', json);
+      if (!optionsRes.ok) {
+        const errMsg = json?.error || 'Failed to get registration options';
+        throw new Error(errMsg);
+      }
+      const { options } = json;
 
-      const credential = await startRegistration(options);
+      if (!options || !options.publicKey) {
+        throw new Error('Server returned no registration options: ' + JSON.stringify(json));
+      }
+      if (options.publicKey && (options.publicKey.challenge === undefined || options.publicKey.challenge === null)) {
+        throw new Error('Server returned registration options without a challenge: ' + JSON.stringify(json));
+      }
 
-      const verifyRes = await fetch("http://localhost:4000/register-verify", {
+      // Note: do not convert challenge/ids to ArrayBuffer here. Pass the JSON (base64url strings)
+      // to @simplewebauthn/browser as optionsJSON — the library handles conversion internally.
+
+      // support servers that return either { options: { publicKey: {...} } } OR { options: publicKey }
+      const publicKey = options?.publicKey ?? options;
+
+      if (!publicKey) throw new Error('No publicKey options returned');
+
+      // Pass the JSON options to @simplewebauthn/browser which expects the optionsJSON shape
+      console.debug('Calling startRegistration with optionsJSON:', publicKey);
+      const credential = await startRegistration({ optionsJSON: publicKey as any });
+
+      const verifyRes = await fetch("/api/register-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, cred: credential }),
@@ -120,9 +145,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSkipPasskey = () => {
-    alert("⚠️ You need to register a passkey to use this app.");
-  };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">

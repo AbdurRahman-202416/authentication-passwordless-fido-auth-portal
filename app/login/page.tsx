@@ -53,8 +53,8 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // ✅ Call Express server directly (NOT /api/)
-      const res = await fetch("http://localhost:4000/login/credentials", {
+      // Call Next API route for credentials
+      const res = await fetch("/api/login/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -71,7 +71,7 @@ export default function LoginPage() {
       // ✅ Save userId for passkey step
       setUserId(data.userId);
       setStep(2);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("Network error. Please try again.");
     } finally {
@@ -84,8 +84,13 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      // ✅ Use userId from state
-      const optionsRes = await fetch("http://localhost:4000/login-challenge", {
+      if (!userId) {
+        setError('Missing userId — please verify username & password first');
+        setLoading(false);
+        return;
+      }
+      // Use Next API route for login challenge
+      const optionsRes = await fetch("/api/login-challenge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -96,11 +101,20 @@ export default function LoginPage() {
         throw new Error(err.error || "Failed to get login challenge");
       }
 
-      const { options } = await optionsRes.json();
+  const json = await optionsRes.json();
+  console.debug('/api/login-challenge response:', json);
+  const { options } = json;
 
-      const credential = await startAuthentication(options);
+      // The @simplewebauthn/browser library expects the JSON form (base64url strings)
+      // when using the `optionsJSON` parameter. Do NOT convert challenge/ids to
+      // ArrayBuffers here — let the library handle that conversion internally.
+      const publicKey = options?.publicKey ?? options;
+      if (!publicKey) throw new Error('No publicKey options returned');
 
-      const verifyRes = await fetch("http://localhost:4000/login-verify", {
+      console.debug('Calling startAuthentication with optionsJSON:', publicKey);
+  const credential = await startAuthentication({ optionsJSON: publicKey });
+
+      const verifyRes = await fetch("/api/login-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, cred: credential }),
@@ -114,16 +128,17 @@ export default function LoginPage() {
       } else {
         setError(verifyData.error || "Passkey verification failed");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Login error");
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg || "Login error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
@@ -133,8 +148,8 @@ export default function LoginPage() {
         <div className="bg-gray-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 p-8">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
-              <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-full shadow-lg shadow-indigo-500/50">
+              <div className="absolute inset-0 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
+              <div className="relative bg-linear-to-br from-indigo-500 to-purple-600 p-4 rounded-full shadow-lg shadow-indigo-500/50">
                 <FingerprintIcon />
               </div>
             </div>
@@ -203,7 +218,7 @@ export default function LoginPage() {
               </div>
 
               <button
-                className={`w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
+                className={`w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
                 disabled={loading}
                 onClick={handlePasswordLogin}
               >
@@ -223,7 +238,7 @@ export default function LoginPage() {
               </div>
 
               <button
-                className={`w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
+                className={`w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
                 disabled={loading}
                 onClick={handlePasskeyLogin}
               >
@@ -262,7 +277,7 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center">
             <p className="text-gray-400 text-sm">
-              Don't have an account?{" "}
+              Do not have an account?{" "}
               <a href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
                 Register here
               </a>
