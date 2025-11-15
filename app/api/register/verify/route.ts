@@ -7,8 +7,8 @@ export async function POST(request: Request) {
   try {
     const { username, credential } = await request.json();
 
-    console.log("VERIFY REGISTER: username =", username);
-    console.log("Browser credential received:", credential);
+  // ...existing code...
+  // ...existing code...
 
     // 1️⃣ Load user from JSON Server
     const usersRes = await fetch(`${JSON_SERVER}/users?username=${username}`);
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       expectedRPID: "dp2lpccp-3000.asse.devtunnels.ms",
     });
 
-    console.log("Verification result:", verification);
+  // ...existing code...
 
     if (!verification.verified) {
       console.error("❌ Registration not verified", verification);
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     const regInfo = verification.registrationInfo;
 
     if (regInfo && regInfo.credential) {
-      // ✅ Correct nested extraction for attestation: 'none'
+  // ...existing code...
       credID = Buffer.from(regInfo.credential.id).toString("base64url");
       pubKey = Buffer.from(regInfo.credential.publicKey).toString("base64url");
       counter = regInfo.credential.counter ?? 0;
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       body: JSON.stringify(updatedUser),
     });
 
-    console.log("✅ SAVED CREDENTIAL:", newCredential);
+  // ...existing code...
 
     return NextResponse.json({ verified: true });
   } catch (err) {

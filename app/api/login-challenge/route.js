@@ -10,7 +10,7 @@ export async function POST(req) {
     if (!userId) return new Response(JSON.stringify({ error: 'userId required' }), { status: 400 });
 
   const user = getUserById(userId);
-  console.debug(`/api/login-challenge request userId=${userId} -> user=`, user);
+  // ...existing code...
   if (!user) return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
 
     const challenge = generateChallenge();
@@ -23,25 +23,25 @@ export async function POST(req) {
       const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || '';
       const origin = req.headers.get('origin') || '';
       const referer = req.headers.get('referer') || req.headers.get('referrer') || '';
-      console.debug(`/api/login-challenge headers host: "${host}", origin: "${origin}", referer: "${referer}"`);
+  // ...existing code...
 
       if (host) {
         rpId = host.split(',')[0].trim().split(':')[0];
-        console.debug(`/api/login-challenge using host header (RP ID): "${rpId}"`);
+  // ...existing code...
       } else if (origin) {
         const url = new URL(origin);
         rpId = url.hostname;
-        console.debug(`/api/login-challenge using origin hostname (RP ID): "${rpId}"`);
+  // ...existing code...
       } else if (referer) {
         const url = new URL(referer);
         rpId = url.hostname;
-        console.debug(`/api/login-challenge using referer hostname (RP ID): "${rpId}"`);
+  // ...existing code...
       }
     } catch (e) {
-      console.debug(`/api/login-challenge header parsing failed:`, e);
+  // ...existing code...
       // fallback to undefined
     }
-    console.debug(`/api/login-challenge final RP ID: "${rpId}"`);
+  // ...existing code...
 
     const credentials = getCredentialsForUser(userId) || [];
     // ensure credential ids are base64url strings (handle several stored shapes)

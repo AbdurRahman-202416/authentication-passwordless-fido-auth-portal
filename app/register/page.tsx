@@ -98,7 +98,7 @@ export default function RegisterPage() {
         body: JSON.stringify({ userId }),
       });
       const json = await optionsRes.json();
-      console.debug('/api/register-challenge response:', json);
+  // ...existing code...
       if (!optionsRes.ok) {
         const errMsg = json?.error || 'Failed to get registration options';
         throw new Error(errMsg);
@@ -121,7 +121,7 @@ export default function RegisterPage() {
       if (!publicKey) throw new Error('No publicKey options returned');
 
       // Pass the JSON options to @simplewebauthn/browser which expects the optionsJSON shape
-      console.debug('Calling startRegistration with optionsJSON:', publicKey);
+  // ...existing code...
       const credential = await startRegistration({ optionsJSON: publicKey as any });
 
       const verifyRes = await fetch("/api/register-verify", {

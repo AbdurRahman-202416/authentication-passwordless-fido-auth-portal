@@ -21,26 +21,26 @@ export async function POST(req) {
       const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || '';
       const origin = req.headers.get('origin') || '';
       const referer = req.headers.get('referer') || req.headers.get('referrer') || '';
-      console.debug(`/api/register-challenge headers host: "${host}", origin: "${origin}", referer: "${referer}"`);
+  // ...existing code...
 
       if (host) {
         // host may include port
         rpId = host.split(',')[0].trim().split(':')[0];
-        console.debug(`/api/register-challenge using host header (RP ID): "${rpId}"`);
+  // ...existing code...
       } else if (origin) {
         const url = new URL(origin);
         rpId = url.hostname;
-        console.debug(`/api/register-challenge using origin hostname (RP ID): "${rpId}"`);
+  // ...existing code...
       } else if (referer) {
         const url = new URL(referer);
         rpId = url.hostname;
-        console.debug(`/api/register-challenge using referer hostname (RP ID): "${rpId}"`);
+  // ...existing code...
       }
     } catch (e) {
-      console.debug(`/api/register-challenge header parsing failed:`, e);
+  // ...existing code...
       // fallback to configured rp.id
     }
-    console.debug(`/api/register-challenge final RP ID: "${rpId}"`);
+  // ...existing code...
 
     // Build the publicKey options object that @simplewebauthn/browser expects
     const options = {
@@ -51,7 +51,7 @@ export async function POST(req) {
         // include both ES256 (-7) and RS256 (-257) to maximize authenticator compatibility
         pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
         timeout: 60000,
-        attestation: 'direct',
+  // ...existing code...
       },
     };
 

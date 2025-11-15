@@ -18,7 +18,7 @@ export async function POST(req) {
   // store user with password (in-memory demo only — do NOT do this in production)
   const userRecord = { id: userId, username, displayName, password };
   saveUser(userRecord);
-  console.debug(`/api/register saved user:`, userRecord);
+  // ...existing code...
 
   return new Response(JSON.stringify({ id: userId }), { status: 201 });
   } catch (err) {

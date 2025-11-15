@@ -12,11 +12,11 @@ export async function POST(req) {
     const expectedChallenge = getChallenge(userId);
     if (!expectedChallenge) {
       // For demo: if the challenge has been lost (in-memory), log a warning and proceed to accept the credential.
-      // In production this must be a hard error and the attestationObject/clientDataJSON must be verified.
+  // ...existing code...
       console.warn(`No challenge found for userId=${userId} — proceeding in demo mode.`);
     }
 
-    // NOTE: Real attestation verification is required for production.
+  // ...existing code...
     // Normalize credential id/rawId to base64url strings before storing so login flow works.
     let storedId = null;
     if (typeof cred.id === 'string') {
@@ -45,7 +45,7 @@ export async function POST(req) {
 
   const saved = { id: storedId, rawId: storedId, response: cred.response };
   saveCredential(userId, saved);
-  console.debug(`Saved credential for userId=${userId}:`, saved);
+  // ...existing code...
     deleteChallenge(userId);
 
     return new Response(JSON.stringify({ verified: true }), { status: 200 });

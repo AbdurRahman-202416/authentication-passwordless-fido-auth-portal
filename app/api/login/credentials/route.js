@@ -7,12 +7,12 @@ export async function POST(req) {
     const { username, password } = await req.json();
     if (!username || !password) return new Response(JSON.stringify({ error: 'username and password required' }), { status: 400 });
 
-    console.debug(`/api/login/credentials attempt for username=", ${username}"`);
+  // ...existing code...
     const user = getUserByUsername(username);
     if (!user) {
-      // dump known users for debugging
+  // ...existing code...
       const known = listAllUsers();
-      console.debug(`/api/login/credentials user not found. known users=`, known);
+  // ...existing code...
       return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
     }
 

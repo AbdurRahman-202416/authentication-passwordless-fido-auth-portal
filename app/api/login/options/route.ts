@@ -15,10 +15,10 @@ export async function POST(request: Request) {
     const user = users[0];
     
     // ✅ Add logging
-    console.log("User credentials from DB:", user.credentials);
+  // ...existing code...
 
     const allowCredentials = (user.credentials || []).map((cred: any) => {
-      console.log("Credential ID:", cred.id);
+  // ...existing code...
       return {
         id: cred.id,
         type: "public-key" as const,
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     });
     
     // ✅ Log the final options
-    console.log("Generated options:", JSON.stringify(options, null, 2));
+  // ...existing code...
 
     await fetch(`${JSON_SERVER}/users/${user.id}`, {
       method: "PUT",

@@ -9,8 +9,8 @@ export async function POST(request: Request) {
   try {
     const { username, credential } = await request.json();
 
-    console.log("LOGIN VERIFY: username =", username);
-    console.log("Browser credential received:", credential);
+  // ...existing code...
+  // ...existing code...
 
     const usersRes = await fetch(`${JSON_SERVER}/users?username=${encodeURIComponent(username)}`);
     const users = await usersRes.json();
@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     // ✅ Convert rawId to base64url for comparison
     const credentialIdBase64 = credential.id; // This is already base64url from the browser
     
-    console.log("Looking for credential ID:", credentialIdBase64);
-    console.log("Available credentials:", user.credentials.map((c: any) => c.id));
+  // ...existing code...
+  // ...existing code...
     
     const authenticator = (user.credentials || []).find((c: any) => c.id === credentialIdBase64);
     
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Authenticator not found' }, { status: 400 });
     }
 
-    console.log("✅ Found authenticator:", authenticator);
+  // ...existing code...
 
     // ✅ Prepare authenticator object for simplewebauthn
     const authenticatorRecord = {
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       counter: authenticator.counter || 0,
     };
 
-    console.log("Authenticator record prepared for verification");
+  // ...existing code...
 
     // ✅ Verify the authentication response
     const verification = await verifyAuthenticationResponse({
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       authenticator: authenticatorRecord,
     });
 
-    console.log("Verification result:", verification);
+  // ...existing code...
 
     if (verification.verified) {
       // ✅ Update counter in JSON server
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         }),
       });
 
-      console.log("✅ Login successful, counter updated");
+  // ...existing code...
       return NextResponse.json({ verified: true });
     }
 

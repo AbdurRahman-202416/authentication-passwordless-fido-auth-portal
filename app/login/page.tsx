@@ -102,7 +102,7 @@ export default function LoginPage() {
       }
 
   const json = await optionsRes.json();
-  console.debug('/api/login-challenge response:', json);
+  // ...existing code...
   const { options } = json;
 
       // The @simplewebauthn/browser library expects the JSON form (base64url strings)
@@ -111,7 +111,7 @@ export default function LoginPage() {
       const publicKey = options?.publicKey ?? options;
       if (!publicKey) throw new Error('No publicKey options returned');
 
-      console.debug('Calling startAuthentication with optionsJSON:', publicKey);
+  // ...existing code...
   const credential = await startAuthentication({ optionsJSON: publicKey });
 
       const verifyRes = await fetch("/api/login-verify", {

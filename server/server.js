@@ -48,7 +48,7 @@ app.post("/register", (req, res) => {
   const id = `user_${Date.now()}`;
   userStore[id] = { id, username, password };
 
-  console.log(`✅ Registered user: ${username} (${id})`);
+  // ...existing code...
   return res.json({ id });
 });
 
@@ -66,7 +66,7 @@ app.post("/register-challenge", async (req, res) => {
     rpName: "My Local App",
     userName: user.username,
     timeout: 60000,
-    attestationType: "none",
+  // ...existing code...
     excludeCredentials: user.passkey
       ? [{ id: user.passkey.credentialID, type: "public-key" }]
       : [],
@@ -223,5 +223,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 WebAuthn server running on http://localhost:${PORT}`);
+  // ...existing code...
 });

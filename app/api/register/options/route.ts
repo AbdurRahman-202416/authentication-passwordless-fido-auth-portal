@@ -6,17 +6,17 @@ const JSON_SERVER = "http://localhost:4000";
 
 export async function POST(request: Request) {
   try {
-    console.log("✅ /api/register/options called");
+  // ...existing code...
 
     const { username } = await request.json();
-    console.log("✅ username:", username);
+  // ...existing code...
 
     // Get or create user
     const usersRes = await fetch(
       `${JSON_SERVER}/users?username=${encodeURIComponent(username)}`
     );
     const users = await usersRes.json();
-    console.log("✅ users found:", users);
+  // ...existing code...
 
     let user;
     if (users.length === 0) {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
       });
-      console.log("✅ user created:", user, "status:", createRes.status);
+  // ...existing code...
     } else {
       user = users[0];
     }
@@ -37,14 +37,14 @@ export async function POST(request: Request) {
       rpID: "dp2lpccp-3000.asse.devtunnels.ms",
       userID: Buffer.from(user.id), // <--- IMPORTANT
       userName: user.username,
-      attestationType: "none",
+  // ...existing code...
       authenticatorSelection: {
         userVerification: "required",
         residentKey: "preferred",
       },
     });
 
-    console.log("✅ options generated:", options);
+  // ...existing code...
 
     // Save challenge to user
     await fetch(`${JSON_SERVER}/users/${user.id}`, {
