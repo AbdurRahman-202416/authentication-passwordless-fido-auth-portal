@@ -3,6 +3,7 @@
 import { startRegistration } from "@simplewebauthn/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const ShieldCheckIcon = () => (
   <svg
@@ -132,13 +133,15 @@ export default function RegisterPage() {
       const verifyData = await verifyRes.json();
 
       if (verifyData.verified) {
-        alert("✅ Registration complete!");
+        toast.success("Registration complete — you can now log in");
         router.push("/login");
       } else {
+        toast.error("Passkey registration failed");
         setError("Passkey registration failed");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Passkey registration error");
       setError("Passkey registration error");
     } finally {
       setLoading(false);

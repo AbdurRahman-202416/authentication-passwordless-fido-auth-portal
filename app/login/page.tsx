@@ -4,6 +4,7 @@
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const FingerprintIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-16 h-16">
@@ -123,15 +124,17 @@ export default function LoginPage() {
       const verifyData = await verifyRes.json();
 
       if (verifyData.success) {
-        alert("✅ Login Successful!");
+        toast.success("Login successful — redirecting to dashboard");
         router.push("/dashboard");
       } else {
+        toast.error(verifyData.error || "Passkey verification failed");
         setError(verifyData.error || "Passkey verification failed");
       }
     } catch (err: unknown) {
       console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(msg || "Login error");
+        const msg = err instanceof Error ? err.message : String(err);
+        toast.error(msg || "Login error");
+        setError(msg || "Login error");
     } finally {
       setLoading(false);
     }
