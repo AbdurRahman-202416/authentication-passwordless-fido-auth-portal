@@ -1,8 +1,10 @@
 "use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-const KeyIcon = ({ className }) => (
+const KeyIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -22,29 +24,24 @@ const KeyIcon = ({ className }) => (
 );
 
 export default function Navbar() {
-  const [activePath, setActivePath] = useState("");
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const getLinkClasses = (href) => {
-    const isActive = activePath === href;
+  const getLinkClasses = (href: string) => {
+    const isActive = pathname === href;
     return isActive
-      ? "text-white font-bold border-b-2 border-indigo-400"
-      : "text-gray-300 hover:text-white transition duration-200";
-  };
-
-  const handleLinkClick = (href) => {
-    setActivePath(href);
-    setMenuOpen(false); // Close mobile menu
+      ? "text-white font-semibold border-b-2 border-indigo-400"
+      : "text-gray-300 hover:text-white transition";
   };
 
   return (
-    <nav className="bg-gray-900 shadow-xl border-b border-indigo-500/30 sticky top-0 z-10">
+    <nav className="bg-gray-900 shadow-xl border-b border-indigo-500/30 sticky top-0 z-20">
       <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+        
         {/* Logo */}
         <Link
           href="/"
           className="flex items-center space-x-3 text-white hover:text-indigo-400"
-          onClick={() => handleLinkClick("/")}
         >
           <KeyIcon className="w-6 h-6 text-indigo-500" />
           <span className="font-extrabold text-xl tracking-wider">
@@ -53,28 +50,14 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-6 text-sm sm:text-base">
-          <Link
-            href="/"
-            className={getLinkClasses("/")}
-            onClick={() => handleLinkClick("/")}
-          >
+        <div className="hidden md:flex items-center space-x-6 text-base">
+          <Link href="/" className={getLinkClasses("/")}>
             Home
           </Link>
-
-          <Link
-            href="/register"
-            className={getLinkClasses("/register")}
-            onClick={() => handleLinkClick("/register")}
-          >
+          <Link href="/register" className={getLinkClasses("/register")}>
             Register
           </Link>
-
-          <Link
-            href="/login"
-            className={getLinkClasses("/login")}
-            onClick={() => handleLinkClick("/login")}
-          >
+          <Link href="/login" className={getLinkClasses("/login")}>
             Sign In
           </Link>
         </div>
@@ -82,44 +65,31 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
         <button
           className="md:hidden text-gray-300 hover:text-white transition"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen((prev) => !prev)}
         >
-          {menuOpen ? (
-            <span className="text-3xl">✖</span>
-          ) : (
-            <span className="text-3xl">☰</span>
-          )}
+          <span className="text-3xl">{menuOpen ? "✖" : "☰"}</span>
         </button>
       </div>
 
       {/* Mobile Dropdown Menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-gray-800 border-t border-gray-700 px-4 py-3 space-y-2   flex  justify-around max-w-[60%] text-base">
-          <Link
-            href="/"
-            className={getLinkClasses("/")}
-            onClick={() => handleLinkClick("/")}
-          >
+      <div
+        className={`md:hidden bg-gray-800 border-t border-gray-700 
+          transition-all duration-300 overflow-hidden 
+          ${menuOpen ? "max-h-40 py-3" : "max-h-0 py-0"}
+        `}
+      >
+        <div className="flex flex-col space-y-3 px-6 text-lg">
+          <Link href="/" className={getLinkClasses("/")} onClick={() => setMenuOpen(false)}>
             Home
           </Link>
-
-          <Link
-            href="/register"
-            className={getLinkClasses("/register")}
-            onClick={() => handleLinkClick("/register")}
-          >
+          <Link href="/register" className={getLinkClasses("/register")} onClick={() => setMenuOpen(false)}>
             Register
           </Link>
-
-          <Link
-            href="/login"
-            className={getLinkClasses("/login")}
-            onClick={() => handleLinkClick("/login")}
-          >
+          <Link href="/login" className={getLinkClasses("/login")} onClick={() => setMenuOpen(false)}>
             Sign In
           </Link>
         </div>
-      )}
+      </div>
     </nav>
   );
 }

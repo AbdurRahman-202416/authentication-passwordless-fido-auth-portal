@@ -46,13 +46,13 @@ export async function POST(request: Request) {
   // ...existing code...
 
     // ✅ Verify the authentication response
-    const verification = await verifyAuthenticationResponse({
+    const verification = await verifyAuthenticationResponse(({
       response: credential,
       expectedChallenge: user.currentChallenge,
       expectedOrigin: 'https://dp2lpccp-3000.asse.devtunnels.ms',
       expectedRPID: 'dp2lpccp-3000.asse.devtunnels.ms',
       authenticator: authenticatorRecord,
-    });
+    } as any));
 
   // ...existing code...
 
