@@ -37,16 +37,18 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-900 shadow-xl border-b border-indigo-500/30 sticky top-0 z-20">
       <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-        
         {/* Logo */}
         <Link
           href="/"
           className="flex items-center space-x-3 text-white hover:text-indigo-400"
         >
-          <KeyIcon className="w-6 h-6 text-indigo-500" />
-          <span className="font-extrabold text-xl tracking-wider">
+          <KeyIcon className="w-6 h-6 rounded-2xl text-white hover:text-indigo-800" />
+          <div className="font-extrabold text-xl tracking-wider">
             FIDO Passkey
-          </span>
+            <div className="text-[10px] font-normal">
+              Fast Identity Online
+            </div>
+          </div>
         </Link>
 
         {/* Desktop Menu */}
@@ -79,13 +81,25 @@ export default function Navbar() {
         `}
       >
         <div className="flex flex-col space-y-3 px-6 text-lg">
-          <Link href="/" className={getLinkClasses("/")} onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/"
+            className={getLinkClasses("/")}
+            onClick={() => setMenuOpen(false)}
+          >
             Home
           </Link>
-          <Link href="/register" className={getLinkClasses("/register")} onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/register"
+            className={getLinkClasses("/register")}
+            onClick={() => setMenuOpen(false)}
+          >
             Register
           </Link>
-          <Link href="/login" className={getLinkClasses("/login")} onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/login"
+            className={getLinkClasses("/login")}
+            onClick={() => setMenuOpen(false)}
+          >
             Sign In
           </Link>
         </div>

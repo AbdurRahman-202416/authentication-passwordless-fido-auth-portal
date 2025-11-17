@@ -1,13 +1,23 @@
 // app/login/page.tsx
-'use client';
+"use client";
 
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 const FingerprintIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-16 h-16">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-16 h-16"
+  >
     <path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4" />
     <path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2" />
     <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
@@ -21,16 +31,34 @@ const FingerprintIcon = () => (
 );
 
 const UserIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gray-400">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5 text-gray-400"
+  >
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
 const LockIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gray-400">
-    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5 text-gray-400"
+  >
+    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </svg>
 );
 
@@ -86,7 +114,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       if (!userId) {
-        setError('Missing userId — please verify username & password first');
+        setError("Missing userId — please verify username & password first");
         setLoading(false);
         return;
       }
@@ -102,18 +130,18 @@ export default function LoginPage() {
         throw new Error(err.error || "Failed to get login challenge");
       }
 
-  const json = await optionsRes.json();
-  // ...existing code...
-  const { options } = json;
+      const json = await optionsRes.json();
+      // ...existing code...
+      const { options } = json;
 
       // The @simplewebauthn/browser library expects the JSON form (base64url strings)
       // when using the `optionsJSON` parameter. Do NOT convert challenge/ids to
       // ArrayBuffers here — let the library handle that conversion internally.
       const publicKey = options?.publicKey ?? options;
-      if (!publicKey) throw new Error('No publicKey options returned');
+      if (!publicKey) throw new Error("No publicKey options returned");
 
-  // ...existing code...
-  const credential = await startAuthentication({ optionsJSON: publicKey });
+      // ...existing code...
+      const credential = await startAuthentication({ optionsJSON: publicKey });
 
       const verifyRes = await fetch("/api/login-verify", {
         method: "POST",
@@ -124,17 +152,20 @@ export default function LoginPage() {
       const verifyData = await verifyRes.json();
 
       if (verifyData.success) {
-        toast.success("Login successful — redirecting to dashboard");
+        localStorage.setItem("registeredUser", username);
+        localStorage.setItem("LoginSuccess", "true");
+        toast.success("Login successful");
         router.push("/dashboard");
       } else {
+        localStorage.setItem("LoginSuccess", "false");
         toast.error(verifyData.error || "Passkey verification failed");
         setError(verifyData.error || "Passkey verification failed");
       }
     } catch (err: unknown) {
       console.error(err);
-        const msg = err instanceof Error ? err.message : String(err);
-        toast.error(msg || "Login error");
-        setError(msg || "Login error");
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(msg || "Login error");
+      setError(msg || "Login error");
     } finally {
       setLoading(false);
     }
@@ -161,9 +192,21 @@ export default function LoginPage() {
           {/* Progress Indicator */}
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${step >= 1 ? 'bg-indigo-500' : 'bg-gray-600'}`}></div>
-              <div className={`w-8 h-1 ${step >= 2 ? 'bg-indigo-500' : 'bg-gray-600'}`}></div>
-              <div className={`w-3 h-3 rounded-full ${step >= 2 ? 'bg-indigo-500' : 'bg-gray-600'}`}></div>
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  step >= 1 ? "bg-indigo-500" : "bg-gray-600"
+                }`}
+              ></div>
+              <div
+                className={`w-8 h-1 ${
+                  step >= 2 ? "bg-indigo-500" : "bg-gray-600"
+                }`}
+              ></div>
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  step >= 2 ? "bg-indigo-500" : "bg-gray-600"
+                }`}
+              ></div>
             </div>
           </div>
 
@@ -186,7 +229,9 @@ export default function LoginPage() {
             /* Step 1: Username and Password */
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Username
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <UserIcon />
@@ -203,7 +248,9 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <LockIcon />
@@ -214,14 +261,18 @@ export default function LoginPage() {
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handlePasswordLogin()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handlePasswordLogin()
+                    }
                     disabled={loading}
                   />
                 </div>
               </div>
 
               <button
-                className={`w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
+                className={`w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${
+                  loading ? "animate-pulse" : ""
+                }`}
                 disabled={loading}
                 onClick={handlePasswordLogin}
               >
@@ -233,7 +284,10 @@ export default function LoginPage() {
             <div className="space-y-4">
               <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4 mb-6">
                 <p className="text-sm text-gray-300 mb-2">
-                  ✅ Password verified for: <span className="text-indigo-400 font-semibold">{username}</span>
+                  ✅ Password verified for:{" "}
+                  <span className="text-indigo-400 font-semibold">
+                    {username}
+                  </span>
                 </p>
                 <p className="text-xs text-gray-400">
                   Now verify your identity with your registered passkey.
@@ -241,19 +295,39 @@ export default function LoginPage() {
               </div>
 
               <button
-                className={`w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${loading ? 'animate-pulse' : ''}`}
+                className={`w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${
+                  loading ? "animate-pulse" : ""
+                }`}
                 disabled={loading}
                 onClick={handlePasskeyLogin}
               >
                 {loading ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Authenticating...
                   </span>
-                ) : "Verify with Passkey 🔐"}
+                ) : (
+                  "Verify with Passkey 🔐"
+                )}
               </button>
 
               <button
@@ -281,16 +355,20 @@ export default function LoginPage() {
           <div className="mt-8 text-center">
             <p className="text-gray-400 text-sm">
               Do not have an account?{" "}
-              <a href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+              <Link
+                href="/register"
+                className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+              >
                 Register here
-              </a>
+              </Link>
             </p>
           </div>
         </div>
 
         <div className="mt-6 text-center">
           <p className="text-gray-500 text-sm">
-            Protected by <span className="text-indigo-400 font-semibold">FIDO WebAuthn</span>
+            Protected by{" "}
+            <span className="text-indigo-400 font-semibold">FIDO WebAuthn</span>
           </p>
         </div>
       </div>

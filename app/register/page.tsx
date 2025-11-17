@@ -4,6 +4,7 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 const ShieldCheckIcon = () => (
   <svg
@@ -89,7 +90,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       if (!userId) {
-        setError('Missing userId. Please complete step 1 first.');
+        setError("Missing userId. Please complete step 1 first.");
         setLoading(false);
         return;
       }
@@ -99,18 +100,27 @@ export default function RegisterPage() {
         body: JSON.stringify({ userId }),
       });
       const json = await optionsRes.json();
-  // ...existing code...
+      // ...existing code...
       if (!optionsRes.ok) {
-        const errMsg = json?.error || 'Failed to get registration options';
+        const errMsg = json?.error || "Failed to get registration options";
         throw new Error(errMsg);
       }
       const { options } = json;
 
       if (!options || !options.publicKey) {
-        throw new Error('Server returned no registration options: ' + JSON.stringify(json));
+        throw new Error(
+          "Server returned no registration options: " + JSON.stringify(json)
+        );
       }
-      if (options.publicKey && (options.publicKey.challenge === undefined || options.publicKey.challenge === null)) {
-        throw new Error('Server returned registration options without a challenge: ' + JSON.stringify(json));
+      if (
+        options.publicKey &&
+        (options.publicKey.challenge === undefined ||
+          options.publicKey.challenge === null)
+      ) {
+        throw new Error(
+          "Server returned registration options without a challenge: " +
+            JSON.stringify(json)
+        );
       }
 
       // Note: do not convert challenge/ids to ArrayBuffer here. Pass the JSON (base64url strings)
@@ -119,11 +129,13 @@ export default function RegisterPage() {
       // support servers that return either { options: { publicKey: {...} } } OR { options: publicKey }
       const publicKey = options?.publicKey ?? options;
 
-      if (!publicKey) throw new Error('No publicKey options returned');
+      if (!publicKey) throw new Error("No publicKey options returned");
 
       // Pass the JSON options to @simplewebauthn/browser which expects the optionsJSON shape
-  // ...existing code...
-      const credential = await startRegistration({ optionsJSON: publicKey as any });
+      // ...existing code...
+      const credential = await startRegistration({
+        optionsJSON: publicKey as any,
+      });
 
       const verifyRes = await fetch("/api/register-verify", {
         method: "POST",
@@ -133,7 +145,8 @@ export default function RegisterPage() {
       const verifyData = await verifyRes.json();
 
       if (verifyData.verified) {
-        toast.success("Registration complete — you can now log in");
+        localStorage.setItem("registeredUser", username);
+        toast.success("Registration complete ,you can Sign in now");
         router.push("/login");
       } else {
         toast.error("Passkey registration failed");
@@ -147,8 +160,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
@@ -243,6 +254,7 @@ export default function RegisterPage() {
                     onKeyPress={(e) =>
                       e.key === "Enter" && handleInitialRegister()
                     }
+                    form="no-form"
                     disabled={loading}
                   />
                 </div>
@@ -329,12 +341,12 @@ export default function RegisterPage() {
           <div className="mt-8 text-center">
             <p className="text-gray-400 text-sm">
               Already have an account?{" "}
-              <a
+              <Link
                 href="/login"
                 className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
               >
                 Sign in here
-              </a>
+              </Link>
             </p>
           </div>
         </div>
