@@ -326,7 +326,7 @@ export default function LoginPage() {
                     Authenticating...
                   </span>
                 ) : (
-                  "Verify with Passkey 🔐"
+                  "Verify with Passkey "
                 )}
               </button>
 
@@ -342,13 +342,13 @@ export default function LoginPage() {
 
           <div className="mt-8 flex flex-wrap gap-2 justify-center">
             <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500/20">
-              🛡️ Secure
+               Secure
             </span>
             <span className="bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full text-xs font-medium border border-cyan-500/20">
-              ⚡ Fast
+               Fast
             </span>
             <span className="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-xs font-medium border border-purple-500/20">
-              🔒 2-Factor
+               2-Factor (2FA)
             </span>
           </div>
 

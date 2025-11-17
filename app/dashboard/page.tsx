@@ -107,7 +107,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           <button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-900 text-white px-4 py-2 rounded-lg italic transition-colors text-sm font-medium"
+            className="bg-red-900 hover:bg-red-950 text-white px-4 py-2 rounded-lg italic transition-colors text-sm font-medium"
           >
             Logout
           </button>
@@ -226,13 +226,13 @@ export default function DashboardPage() {
         {/* Feature Tags */}
         <div className="mt-6 flex flex-wrap gap-2 justify-center">
           <span className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-sm font-medium border border-emerald-500/20">
-            🔐 Two-Factor Authentication
+             Two-Factor Authentication
           </span>
           <span className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium border border-blue-500/20">
-            🛡️ WebAuthn Secured
+             WebAuthn Secured
           </span>
           <span className="bg-purple-500/10 text-purple-400 px-4 py-2 rounded-full text-sm font-medium border border-purple-500/20">
-            ⚡ Fast & Secure
+             Fast & Secure
           </span>
         </div>
       </div>

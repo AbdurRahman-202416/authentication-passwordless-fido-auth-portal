@@ -320,7 +320,7 @@ export default function RegisterPage() {
                     Registering Passkey...
                   </span>
                 ) : (
-                  "Register Passkey 🔐"
+                  "Register Passkey "
                 )}
               </button>
             </div>
@@ -328,13 +328,13 @@ export default function RegisterPage() {
 
           <div className="mt-8 flex flex-wrap gap-2 justify-center">
             <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500/20">
-              🔐 Biometric
+               Biometric
             </span>
             <span className="bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full text-xs font-medium border border-cyan-500/20">
-              🚀 Fast Setup
+               Fast Setup
             </span>
             <span className="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-xs font-medium border border-purple-500/20">
-              🛡️ Secure
+               Secure
             </span>
           </div>
 
