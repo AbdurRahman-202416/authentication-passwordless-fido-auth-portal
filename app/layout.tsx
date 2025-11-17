@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "Authentication",
     "Next.js",
   ],
-  authors: [{ name: "Gemini AI" }],
+  authors: [{ name: "Abdur Rahman (Shanto)" }],
 };
 export default function RootLayout({
   children,
