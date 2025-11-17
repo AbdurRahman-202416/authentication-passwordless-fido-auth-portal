@@ -53,18 +53,18 @@ export default function HeroSection() {
             {/* Feature Tags */}
             <div className="flex flex-wrap gap-2 sm:gap-3 justify-center lg:justify-start mb-6 sm:mb-8">
               <span className="bg-indigo-500/20 text-indigo-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-indigo-500/30">
-                 Secure
+                Secure
               </span>
               <span className="bg-emerald-500/20 text-emerald-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-emerald-500/30">
-                 Lightning Fast
+                Lightning Fast
               </span>
               <span className="bg-purple-500/20 text-purple-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-purple-500/30">
-                 Phishing-Proof
+                Phishing-Proof
               </span>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-row gap-4 justify-center lg:justify-start w-full px-4 sm:px-0">
+            <div className="flex flex-row gap-2 justify-center lg:justify-start w-full px-0 sm:px-0">
               <Link
                 href="/register"
                 className="
@@ -72,7 +72,7 @@ export default function HeroSection() {
       bg-gradient-to-r from-indigo-600 to-purple-600
       hover:from-indigo-700 hover:to-purple-700 text-nowrap
       text-white font-semibold
-      py-3 sm:py-4 px-6 sm:px-8
+      py-3 sm:py-4 px-4 sm:px-8
       rounded-2xl
       shadow-md shadow-indigo-400/40
       transition-all duration-300
@@ -87,10 +87,10 @@ export default function HeroSection() {
               <Link
                 href="/login"
                 className="
-                     flex items-center justify-center
+                     flex items-center justify-center min-w-[150px]
                      bg-green-800 hover:bg-gray-700
                      text-white font-semibold
-                     py-3 sm:py-4 px-6 sm:px-8
+                     py-3 sm:py-4 px-4 sm:px-8
                      rounded-2xl
                      shadow-md shadow-gray-500/30
                      transition-all duration-300
