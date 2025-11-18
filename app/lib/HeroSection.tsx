@@ -21,7 +21,7 @@ export default function HeroSection() {
   return (
     <div className="bg-gray-900">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center py-5 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -35,7 +35,7 @@ export default function HeroSection() {
               <div className="space-y-4">
                 <div className="inline-block">
                   <span className="bg-indigo-500/20 text-indigo-300 px-4 py-2 rounded-full text-sm font-semibold border border-indigo-500/30 backdrop-blur-sm">
-                    FIDO2 WebAuthn Technology
+                    FIDO2 WebAuthn Technology.
                   </span>
                 </div>
 
