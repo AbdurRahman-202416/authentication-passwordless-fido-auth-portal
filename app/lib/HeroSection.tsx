@@ -21,7 +21,7 @@ export default function HeroSection() {
   return (
     <div className="bg-gray-900">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center py-5 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center py-4 px-4  lg:px-8 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -31,7 +31,7 @@ export default function HeroSection() {
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             {/* Text Content */}
-            <div className=" w-full text-center lg:text-left space-y-8">
+            <div className=" w-full text-center  space-y-8">
               <div className="space-y-4">
                 <div className="inline-block">
                   <span className="bg-indigo-500/20 text-indigo-300 px-4 py-2 rounded-full text-sm font-semibold border border-indigo-500/30 backdrop-blur-sm">
@@ -39,7 +39,7 @@ export default function HeroSection() {
                   </span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-extrabold leading-tight">
+                <h1 className="text-2xl text-center sm:text-3xl md:text-4xl lg:text-5xl text-white font-extrabold leading-tight">
                   Hello Passkeys.
                 </h1>
 
