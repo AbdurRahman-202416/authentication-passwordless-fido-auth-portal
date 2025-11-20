@@ -71,8 +71,10 @@ export default function DashboardPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [loginTime, setLoginTime] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     if (localStorage.getItem("LoginSuccess") !== "true") {
       router.push("/login");
       return;
@@ -86,12 +88,34 @@ export default function DashboardPage() {
     //   localStorage.removeItem("LoginSuccess");
     //   localStorage.removeItem("registeredUser");
     // }
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   }, []);
 
   const handleLogout = () => {
+    setLoading(true);
     localStorage.clear();
     router.push("/login");
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-50">
+        <div className="p-6 rounded-lg shadow-lg flex flex-col items-center">
+          <div className="flex gap-2 mb-3">
+            {/* Bouncing loader balls */}
+            <div className="w-4 sm:h-8 sm:w-8 h-4 bg-blue-800 rounded-full animate-bounce"></div>
+            <div className="w-4 sm:h-8 sm:w-8 h-4 bg-green-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-4 sm:h-8 sm:w-8 h-4 bg-red-500 rounded-full animate-bounce [animation-delay:-0.5s]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
@@ -226,13 +250,13 @@ export default function DashboardPage() {
         {/* Feature Tags */}
         <div className="mt-6 flex flex-wrap gap-2 justify-center">
           <span className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-sm font-medium border border-emerald-500/20">
-             Two-Factor Authentication
+            Two-Factor Authentication
           </span>
           <span className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium border border-blue-500/20">
-             WebAuthn Secured
+            WebAuthn Secured
           </span>
           <span className="bg-purple-500/10 text-purple-400 px-4 py-2 rounded-full text-sm font-medium border border-purple-500/20">
-             Fast & Secure
+            Fast & Secure
           </span>
         </div>
       </div>
